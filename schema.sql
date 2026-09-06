@@ -205,3 +205,21 @@ ANALYZE cliente;
 ANALYZE producto;
 ANALYZE pedido;
 ANALYZE detalle_pedido;
+
+SELECT p1.nombre, p1.precio_actual
+FROM producto p1
+WHERE p1.precio_actual > (
+    SELECT AVG(p2.precio_actual)
+    FROM producto p2
+    WHERE p2.categoria_id = p1.categoria_id
+)
+ORDER BY p1.precio_actual DESC;
+
+-- Verificación de equivalencia para la consulta de productos de alto precio
+(
+  SELECT id FROM producto WHERE precio_actual > 1000 AND activo = TRUE
+)
+EXCEPT
+(
+  SELECT p.id FROM producto p WHERE p.activo = TRUE AND p.precio_actual > 1000
+);
