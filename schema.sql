@@ -104,7 +104,7 @@ CREATE INDEX idx_pedido_cliente_id ON pedido(cliente_id);
 CREATE INDEX idx_producto_categoria_activo ON producto(categoria_id, activo);
 
 -- =============================================================================
--- REGLAS Y RESTRICCIONES - FOOD STORE (PARTE 1 - TP3)
+-- REGLAS Y RESTRICCIONES - FOOD STORE (TP2)
 -- Autor: Facundo Cabrera
 -- =============================================================================
 
