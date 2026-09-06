@@ -104,42 +104,9 @@ CREATE INDEX idx_pedido_cliente_id ON pedido(cliente_id);
 CREATE INDEX idx_producto_categoria_activo ON producto(categoria_id, activo);
 
 -- =============================================================================
--- DATOS DE PRUEBA - FOOD STORE
+-- REGLAS Y RESTRICCIONES - FOOD STORE (PARTE 1 - TP3)
+-- Autor: Facundo Cabrera
 -- =============================================================================
-
--- 1. Insertar Categorías
-INSERT INTO categoria (nombre, activo) VALUES
-('Pizzas', TRUE),
-('Empanadas', TRUE),
-('Bebidas', TRUE);
-
--- 2. Insertar Productos
--- Nota: La categoría 1 es Pizzas, 2 es Empanadas, 3 es Bebidas
-INSERT INTO producto (nombre, precio_actual, stock, activo, categoria_id) VALUES
-('Pizza Muzzarella', 1050.00, 30, TRUE, 1),
-('Empanada de Carne', 150.00, 100, TRUE, 2),
-('Coca Cola 1.5L', 500.00, 50, TRUE, 3);
-
--- 3. Insertar Clientes
-INSERT INTO cliente (nombre, email) VALUES
-('Juan Pérez', 'juan.perez@email.com'),
-('María Gómez', 'maria.gomez@email.com'),
-('Carlos López', 'carlos.lopez@email.com');
-
--- 4. Insertar Pedidos
--- Formas de pago válidas: 'EFECTIVO', 'TARJETA', 'TRANSFERENCIA'
-INSERT INTO pedido (cliente_id, forma_pago, fecha) VALUES
-(1, 'EFECTIVO', NOW() - INTERVAL '2 days'),      -- Pedido 1 (Cliente: Juan)
-(2, 'TARJETA', NOW() - INTERVAL '1 day'),       -- Pedido 2 (Cliente: María)
-(1, 'TRANSFERENCIA', NOW());                    -- Pedido 3 (Cliente: Juan)
-
--- 5. Insertar Detalle de Pedidos
--- Demuestra el registro de precios históricos al momento de la venta
-INSERT INTO detalle_pedido (pedido_id, producto_id, cantidad, precio_unitario) VALUES
-(1, 1, 1, 1000.00), -- Pedido 1: 1 Muzzarella a precio histórico ($1000)
-(1, 3, 2, 450.00),  -- Pedido 1: 2 Coca Colas a $450 c/u
-(2, 2, 6, 150.00),  -- Pedido 2: 6 Empanadas a $150 c/u
-(3, 1, 2, 1050.00); -- Pedido 3: 2 Muzzarellas al precio actual ($1050)
 
 BEGIN;
 -- 1. Regla: Validar formato básico de correo electrónico en clientes
@@ -154,7 +121,7 @@ CHECK (fecha <= NOW());
 COMMIT;
 
 -- =============================================================================
--- SCRIPT DE POBLADO MASIVO - FOOD STORE (PARTE 1 - TP3)
+-- SCRIPT DE POBLADO MASIVO - FOOD STORE (TP3)
 -- Autor: Facundo Cabrera
 -- =============================================================================
 
