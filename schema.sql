@@ -1,6 +1,3 @@
-
-
-
 -- =============================================================================
 -- TRABAJO PRÁCTICO N.º 1 - FOOD STORE
 -- Archivo: schema.sql
@@ -155,3 +152,56 @@ ALTER TABLE pedido
 ADD CONSTRAINT chk_pedido_fecha_no_futura 
 CHECK (fecha <= NOW());
 COMMIT;
+
+-- =============================================================================
+-- SCRIPT DE POBLADO MASIVO - FOOD STORE (PARTE 1 - TP3)
+-- Autor: Facundo Cabrera
+-- =============================================================================
+
+BEGIN;
+
+-- 1. Insertar 20.000 Clientes de forma masiva
+INSERT INTO cliente (nombre, email)
+SELECT 
+    'Cliente ' || i,
+    'usuario' || i || '@correo' || (i % 100) || '.com'
+FROM generate_series(1, 20000) AS s(i);
+
+-- 2. Insertar 50.000 Productos distribuidos entre las categorías existentes (1, 2, 3)
+INSERT INTO producto (nombre, precio_actual, stock, activo, categoria_id)
+SELECT 
+    'Producto Masivo ' || i,
+    ROUND((500 + RANDOM() * 4500)::numeric, 2), -- Precios entre 500 y 5000
+    CAST(RANDOM() * 200 AS INT),                -- Stock entre 0 y 200
+    TRUE,
+    ((i % 3) + 1)                               -- Distribución pareja en categorías 1, 2 y 3
+FROM generate_series(1, 50000) AS s(i);
+
+-- 3. Insertar 200.000 Pedidos asociados a clientes aleatorios
+INSERT INTO pedido (cliente_id, forma_pago, fecha)
+SELECT 
+    ((i % 20000) + 1),                          -- Distribuido entre los 20.000 clientes
+    CASE (i % 3) 
+        WHEN 0 THEN 'EFECTIVO'::forma_pago_enum 
+        WHEN 1 THEN 'TARJETA'::forma_pago_enum 
+        ELSE 'TRANSFERENCIA'::forma_pago_enum 
+    END,
+    NOW() - (RANDOM() * INTERVAL '365 days')    -- Fechas aleatorias en el último año
+FROM generate_series(1, 200000) AS s(i);
+
+-- 4. Insertar Detalles de Pedido (1 o 2 ítems por pedido para llegar a ~300.000 detalles)
+INSERT INTO detalle_pedido (pedido_id, producto_id, cantidad, precio_unitario)
+SELECT 
+    p.id,
+    ((p.id % 50000) + 1),                       -- Producto asociado
+    (1 + (p.id % 5)),                           -- Cantidad entre 1 y 5
+    1500.00                                     -- Precio unitario de referencia
+FROM pedido p;
+
+COMMIT;
+
+-- 5. Actualizar estadísticas del optimizador (Obligatorio antes de medir con EXPLAIN)
+ANALYZE cliente;
+ANALYZE producto;
+ANALYZE pedido;
+ANALYZE detalle_pedido;
