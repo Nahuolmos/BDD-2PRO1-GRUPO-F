@@ -1,0 +1,45 @@
+# Trabajo Práctico 3: Optimización Asistida por IA - Food Store
+
+* **Alumno:** Facundo Cabrera
+* **Asignatura:** Base de Datos II (UTN)
+* **Proyecto:** Food Store
+
+---
+
+## Parte 1: Poblado Masivo de Datos
+Se ejecutó un script de inserción masiva sobre una copia de trabajo de la base de datos aplicando el protocolo de seguridad de la cátedra. El volumen final generado consistió en:
+* **20.000** Clientes.
+* **50.000** Productos distribuidos en las categorías existentes.
+* **200.000** Pedidos con sus respectivos detalles.
+* Ejecución posterior de `ANALYZE` sobre las tablas afectadas para actualizar las estadísticas del optimizador de PostgreSQL.
+
+---
+
+## Parte 2: Laboratorio de Consultas Lentas, EXPLAIN y Optimización Medida
+
+Tabla comparativa de rendimiento antes y después de la intervención:
+
+| Consulta | Plan antes (nodo, cost, tiempo real) | Cambio aplicado | Plan después (nodo, cost, tiempo real) | Mejora / Decisión |
+| :--- | :--- | :--- | :--- | :--- |
+| **1. Productos por categoría y precio** | `Sort` / `Bitmap Heap Scan`<br>Cost: 2228.83<br>Tiempo: 13.318 ms | Propuesta de índice compuesto con orden (`categoria_id`, `activo`, `precio_actual DESC`). | `Sort` / `Bitmap Heap Scan`<br>Cost: 2223.39<br>Tiempo: 13.253 ms | **Descartado / Sin cambios:** El motor evaluó que el costo de usar un índice alternativo era mayor al de ordenar en memoria RAM con *quicksort*. Se mantuvo el índice preexistente por criterio técnico. |
+| **3. Agregación y recaudación de detalles** | `HashAggregate` / `Seq Scan`<br>Cost: 22438.82<br>Tiempo: 233.711 ms (Disco: 6992kB) | Creación de índice con columnas incluidas (`producto_id` + `INCLUDE (cantidad, precio_unitario)`). | `GroupAggregate` / `Index Only Scan`<br>Cost: 10226.53<br>Tiempo: 144.943 ms (Disco: 0kB) | **Aceptado:** Se eliminó por completo el recorrido secuencial masivo y el cuello de botella de lectura en disco, logrando una mejora notable en eficiencia y uso de recursos. |
+
+---
+
+## Parte 3: Lectura Crítica de Planes Interpretados por IA
+
+Ejercicio de contraste crítico sobre la explicación generada por un asistente de IA frente al plan real de la Consulta 3 optimizada:
+
+| Afirmación de la IA | ¿Correcta? | Corrección / evidencia del plan real |
+| :--- | :---: | :--- |
+| "El tiempo de ejecución es de 2.163 milisegundos." | **No** | Confunde el *Planning Time* (2.163 ms) con el *Execution Time* real de la consulta, que fue de 144.943 ms. |
+| "La mejora se debe al filtro de categoría que evita procesar filas." | **No** | La tabla `detalle_pedido` no maneja categorías; la optimización real provino de reemplazar el `Seq Scan` por un `Index Only Scan` utilizando el índice `idx_detalle_agregacion`. |
+
+---
+
+## Declaración de Uso de IA (DUIA)
+
+| Herramienta | Para qué se usó | Prompt / Spec (resumen) | Se aceptó / se descartó por qué |
+| :--- | :--- | :--- | :--- |
+| **OpenCode / Kiro** | Generación del script de población masiva con `generate_series`. | *"Generá un script SQL para PostgreSQL que inserte 50.000 filas en producto..."* | **Aceptado:** Se leyó línea por línea, se validó el respeto a restricciones y se ejecutó dentro de una transacción. |
+| **OpenCode / Kiro** | Propuesta de índices para mitigar cuellos de botella en consultas agregadas. | *"Analiza el plan de ejecución y sugiere índices para optimizar el HashAggregate..."* | **Aceptado parcialmente:** El índice de agregación mejoró notablemente a un *Index Only Scan*, mientras que el índice de ordenamiento de la consulta 1 fue descartado al comprobarse que el motor ya operaba de manera óptima en memoria. |
