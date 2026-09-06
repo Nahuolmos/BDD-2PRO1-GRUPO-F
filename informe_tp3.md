@@ -43,3 +43,18 @@ Ejercicio de contraste crítico sobre la explicación generada por un asistente 
 | :--- | :--- | :--- | :--- |
 | **OpenCode / Kiro** | Generación del script de población masiva con `generate_series`. | *"Generá un script SQL para PostgreSQL que inserte 50.000 filas en producto..."* | **Aceptado:** Se leyó línea por línea, se validó el respeto a restricciones y se ejecutó dentro de una transacción. |
 | **OpenCode / Kiro** | Propuesta de índices para mitigar cuellos de botella en consultas agregadas. | *"Analiza el plan de ejecución y sugiere índices para optimizar el HashAggregate..."* | **Aceptado parcialmente:** El índice de agregación mejoró notablemente a un *Index Only Scan*, mientras que el índice de ordenamiento de la consulta 1 fue descartado al comprobarse que el motor ya operaba de manera óptima en memoria. |
+
+---
+
+## Parte 4: Consultas Resumen, Subconsultas y Verificación Formal
+
+### 1. Consulta de Resumen / Agregación
+* **Especificación:** Obtener para cada categoría vigente (`activo = TRUE`) el nombre de la categoría y la cantidad total de productos asociados, incluyendo aquellas categorías sin productos (mostrando 0). Ordenar de mayor a menor cantidad.
+* **Implementación SQL:**
+  ```sql
+  SELECT c.nombre AS categoria, COUNT(p.id) AS total_productos
+  FROM categoria c
+  LEFT JOIN producto p ON c.id = p.categoria_id AND p.activo = TRUE
+  WHERE c.activo = TRUE
+  GROUP BY c.id, c.nombre
+  ORDER BY total_productos DESC;
