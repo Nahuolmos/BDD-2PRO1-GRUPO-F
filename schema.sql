@@ -143,3 +143,15 @@ INSERT INTO detalle_pedido (pedido_id, producto_id, cantidad, precio_unitario) V
 (1, 3, 2, 450.00),  -- Pedido 1: 2 Coca Colas a $450 c/u
 (2, 2, 6, 150.00),  -- Pedido 2: 6 Empanadas a $150 c/u
 (3, 1, 2, 1050.00); -- Pedido 3: 2 Muzzarellas al precio actual ($1050)
+
+BEGIN;
+-- 1. Regla: Validar formato básico de correo electrónico en clientes
+ALTER TABLE cliente
+ADD CONSTRAINT chk_cliente_email_formato 
+CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$');
+
+-- 2. Regla: Evitar pedidos con fechas futuras
+ALTER TABLE pedido
+ADD CONSTRAINT chk_pedido_fecha_no_futura 
+CHECK (fecha <= NOW());
+COMMIT;
