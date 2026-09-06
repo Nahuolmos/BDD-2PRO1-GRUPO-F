@@ -50,8 +50,11 @@ Ejercicio de contraste crítico sobre la explicación generada por un asistente 
   GROUP BY c.id, c.nombre
   ORDER BY total_productos DESC;
 
-Herramienta,Para qué se usó,Prompt / Spec (resumen),Se aceptó / se descartó por qué
-Kiro / Asistente IA,Generación del script de población masiva con generate_series.,"""Generá un script SQL para PostgreSQL que inserte 50.000 filas en producto...""","Aceptado: Se leyó línea por línea, se validó el respeto a restricciones y se ejecutó dentro de una transacción."
-Kiro / Asistente IA,Propuesta de índices para mitigar cuellos de botella en consultas agregadas.,"""Analiza el plan de ejecución y sugiere índices para optimizar el HashAggregate...""","Aceptado parcialmente: El índice de agregación mejoró notablemente a un Index Only Scan, mientras que el índice de ordenamiento de la consulta 1 fue descartado al comprobarse que el motor ya operaba de manera óptima en memoria."
-Kiro / Asistente IA,Asistencia estructural y sintáctica en consultas SQL complejas (subconsultas correlacionadas y funciones de agregación con LEFT JOIN).,"""Ayúdame a estructurar la consulta con subconsulta correlacionada y la verificación lógica con EXCEPT...""","Aceptado: Se verificó la lógica de negocio y se validó la equivalencia de resultados mediante el operador EXCEPT, retornando cero filas."
-Kiro / Asistente IA,Redacción y organización formal del informe técnico en Markdown (informe_tp3.md).,"""Estructura el informe técnico cubriendo poblado, benchmarking con EXPLAIN, análisis crítico y consultas resumen...""",Aceptado: Se revisó y adaptó todo el contenido para que refleje fielmente los resultados obtenidos de la ejecución local en el motor de base de datos.
+## Declaración de Uso de IA (DUIA)
+
+| Herramienta | Para qué se usó | Prompt / Spec (resumen) | Se aceptó / se descartó por qué |
+| :--- | :--- | :--- | :--- |
+| **Kiro / Asistente IA** | Generación del script de población masiva con `generate_series`. | "Generá un script SQL para PostgreSQL que inserte 50.000 filas en producto..." | **Aceptado:** Se leyó línea por línea, se validó el respeto a restricciones y se ejecutó dentro de una transacción. |
+| **Kiro / Asistente IA** | Propuesta de índices para mitigar cuellos de botella en consultas agregadas. | "Analiza el plan de ejecución y sugiere índices para optimizar el HashAggregate..." | **Aceptado parcialmente:** El índice de agregación mejoró notablemente a un *Index Only Scan*, mientras que el índice de ordenamiento de la consulta 1 fue descartado al comprobarse que el motor ya operaba de manera óptima en memoria. |
+| **Kiro / Asistente IA** | Asistencia en consultas SQL complejas (subconsultas correlacionadas y LEFT JOIN). | "Ayúdame a estructurar la consulta con subconsulta correlacionada y la verificación con EXCEPT..." | **Aceptado:** Se verificó la lógica de negocio y se validó la equivalencia de resultados mediante el operador `EXCEPT`, retornando cero filas. |
+| **Kiro / Asistente IA** | Redacción y organización formal del informe técnico en Markdown (`informe_tp3.md`). | "Estructura el informe técnico cubriendo poblado, benchmarking con EXPLAIN y análisis crítico..." | **Aceptado:** Se revisó y adaptó todo el contenido para que refleje fielmente los resultados obtenidos de la ejecución local en el motor. |
