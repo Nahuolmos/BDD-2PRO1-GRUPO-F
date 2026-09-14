@@ -45,6 +45,8 @@ JOIN detalle_pedido dp ON dp.pedido_id = p.id
 GROUP BY cl.id, cl.nombre
 ORDER BY posicion_ranking ASC;
 
+---
+
 ### 2. Consulta 3B: Productos con Precio Superior al Promedio de su Categoría
 
 * **Especificación:** Listar los productos activos (pr.activo = true) cuyo precio_actual supere el precio promedio de su respectiva categoría activa (c.activo = true), ordenados de forma descendente por precio.
