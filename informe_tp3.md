@@ -1,9 +1,5 @@
 # Trabajo Práctico 3: Optimización Asistida por IA - Food Store
 
-* **Alumno:** Facundo Cabrera
-* **Asignatura:** Base de Datos II (UTN)
-* **Proyecto:** Food Store
-
 ---
 
 ## Parte 1: Poblado Masivo de Datos

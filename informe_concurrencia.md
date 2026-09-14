@@ -1,5 +1,7 @@
 # Informe de Concurrencia - Laboratorio TPI
 
+---
+
 ## Escenario 1: Espera por bloqueo (Lock Wait)
 
 * **Cómo se reprodujo:**
