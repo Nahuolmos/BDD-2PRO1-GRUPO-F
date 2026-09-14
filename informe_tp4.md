@@ -44,8 +44,7 @@ JOIN pedido p ON p.cliente_id = cl.id
 JOIN detalle_pedido dp ON dp.pedido_id = p.id
 GROUP BY cl.id, cl.nombre
 ORDER BY posicion_ranking ASC;
-
----
+```
 
 ### 2. Consulta 3B: Productos con Precio Superior al Promedio de su Categoría
 
@@ -95,6 +94,7 @@ SELECT
 FROM promedios
 WHERE precio_actual > promedio_cat
 ORDER BY precio_actual DESC;
+```
 
 ---
 
