@@ -44,3 +44,72 @@ JOIN pedido p ON p.cliente_id = cl.id
 JOIN detalle_pedido dp ON dp.pedido_id = p.id
 GROUP BY cl.id, cl.nombre
 ORDER BY posicion_ranking ASC;
+
+### 2. Consulta 3B: Productos con Precio Superior al Promedio de su Categoría
+
+* **Especificación:** Listar los productos activos (pr.activo = true) cuyo precio_actual supere el precio promedio de su respectiva categoría activa (c.activo = true), ordenados de forma descendente por precio.
+
+* **Comparativa de Estructuras:**
+--Versión 1 (Subconsulta Correlacionada): Ineficiente. Al evaluar la subconsulta en la cláusula WHERE por cada fila de producto, el motor degrada su rendimiento a $O(N^2)$, provocando un cuelgue temporal por el volumen masivo de datos.
+
+--Versión 2 (CTE + Window Function): Optimizada. Resuelve el cálculo en $O(N \log N)$ mediante AVG() OVER (PARTITION BY pr.categoria_id) en una sola pasada.
+
+```sql
+-- Versión 1: Subconsulta Correlacionada en WHERE (Descartada por ineficiente O(N^2))
+SELECT 
+    pr.id AS producto_id,
+    pr.nombre,
+    pr.precio_actual,
+    c.nombre AS categoria
+FROM producto pr
+JOIN categoria c ON c.id = pr.categoria_id
+WHERE pr.activo = true 
+  AND c.activo = true
+  AND pr.precio_actual > (
+      SELECT AVG(sub_pr.precio_actual)
+      FROM producto sub_pr
+      WHERE sub_pr.categoria_id = pr.categoria_id
+        AND sub_pr.activo = true
+  );
+
+-- Versión 2: Seleccionada para queries.sql (CTE con Window Function O(N log N))
+WITH promedios AS (
+    SELECT 
+        pr.id AS producto_id,
+        pr.nombre,
+        pr.precio_actual,
+        c.nombre AS categoria,
+        AVG(pr.precio_actual) OVER (PARTITION BY pr.categoria_id) AS promedio_cat
+    FROM producto pr
+    JOIN categoria c ON c.id = pr.categoria_id
+    WHERE pr.activo = true 
+      AND c.activo = true
+)
+SELECT 
+    producto_id,
+    nombre,
+    precio_actual,
+    categoria
+FROM promedios
+WHERE precio_actual > promedio_cat
+ORDER BY precio_actual DESC;
+
+---
+
+## Parte 4: Competencia de Optimización
+
+Registro de desempeño sobre la consulta analítica compleja asignada por la cátedra:
+
+| Equipo | Plan antes (nodo, cost, tiempo real) | Estrategia Aplicada | Plan después (nodo, cost, tiempo real) | Mejora / Aceleración |
+| :--- | :--- | :--- | :--- | :--- |
+| **Mi Equipo** | *Pendiente (TBD)*<br>Cost: -<br>Tiempo: - ms | *Estrategia a definir según consulta asignada* | *Pendiente (TBD)*<br>Cost: -<br>Tiempo: - ms | **Pendiente de asignación por cátedra** |
+
+---
+
+## Declaración de Uso de Inteligencia Artificial (DUIA)
+
+| Fase del Proyecto | Prompt / Solicitud enviada a la IA | Respuesta / Propuesta de la IA | Decisión y Justificación Técnica |
+| :--- | :--- | :--- | :--- |
+| **Parte 1: Optimización** | *"Analizar el plan EXPLAIN ANALYZE de la Consulta 2 y proponer mejoras para reducir el tiempo de ejecución."* | Identificó la falta de índice en `pedido.cliente_id` y sugirió incrementar `work_mem` a 64MB. | **Aceptada:** Se eliminó el derrame a disco (`external merge Disk: 10008kB`), reduciendo el tiempo de 711.15 ms a 451.72 ms (1.57x de mejora). |
+| **Parte 2: Lectura Crítica** | *"Evaluar la precisión de una explicación sintética de un plan de join."* | Desglosó la diferencia entre costos relativos (`cost=...`) y tiempos reales (`actual time`), e identificó las tablas interna/externa en el Hash Join. | **Aceptada:** Se incorporó la matriz de validación en el informe para demostrar comprensión de los nodos de PostgreSQL. |
+| **Parte 3: Subconsultas** | *"Generar dos versiones equivalentes para la comparación de precios contra el promedio de la categoría."* | Generó una versión con subconsulta correlacionada en `WHERE` y otra con CTE + `AVG() OVER (PARTITION BY ...)`. | **Parcialmente Aceptada:** Se aceptó la versión con función de ventana para `queries.sql` y se descartó la subconsulta correlacionada por su degradación a $O(N^2)$. |
