@@ -50,7 +50,8 @@ ORDER BY posicion_ranking ASC;
 
 * **Especificación:** Listar los productos activos (pr.activo = true) cuyo precio_actual supere el precio promedio de su respectiva categoría activa (c.activo = true), ordenados de forma descendente por precio.
 
-* **Comparativa de Estructuras:**
+### Comparativa de Estructuras:
+
 * **Versión 1 (Subconsulta Correlacionada):** Ineficiente. Al evaluar la subconsulta en la cláusula WHERE por cada fila de producto, el motor degrada su rendimiento a $O(N^2)$, provocando un cuelgue temporal por el volumen masivo de datos.
 
 * **Versión 2 (CTE + Window Function):** Optimizada. Resuelve el cálculo en $O(N \log N)$ mediante AVG() OVER (PARTITION BY pr.categoria_id) en una sola pasada.
