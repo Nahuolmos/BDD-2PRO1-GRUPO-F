@@ -44,15 +44,16 @@ JOIN pedido p ON p.cliente_id = cl.id
 JOIN detalle_pedido dp ON dp.pedido_id = p.id
 GROUP BY cl.id, cl.nombre
 ORDER BY posicion_ranking ASC;
+```
 
 ### 2. Consulta 3B: Productos con Precio Superior al Promedio de su Categoría
 
 * **Especificación:** Listar los productos activos (pr.activo = true) cuyo precio_actual supere el precio promedio de su respectiva categoría activa (c.activo = true), ordenados de forma descendente por precio.
 
 * **Comparativa de Estructuras:**
---Versión 1 (Subconsulta Correlacionada): Ineficiente. Al evaluar la subconsulta en la cláusula WHERE por cada fila de producto, el motor degrada su rendimiento a $O(N^2)$, provocando un cuelgue temporal por el volumen masivo de datos.
+* **Versión 1 (Subconsulta Correlacionada):** Ineficiente. Al evaluar la subconsulta en la cláusula WHERE por cada fila de producto, el motor degrada su rendimiento a $O(N^2)$, provocando un cuelgue temporal por el volumen masivo de datos.
 
---Versión 2 (CTE + Window Function): Optimizada. Resuelve el cálculo en $O(N \log N)$ mediante AVG() OVER (PARTITION BY pr.categoria_id) en una sola pasada.
+* **Versión 2 (CTE + Window Function):** Optimizada. Resuelve el cálculo en $O(N \log N)$ mediante AVG() OVER (PARTITION BY pr.categoria_id) en una sola pasada.
 
 ```sql
 -- Versión 1: Subconsulta Correlacionada en WHERE (Descartada por ineficiente O(N^2))
@@ -93,6 +94,7 @@ SELECT
 FROM promedios
 WHERE precio_actual > promedio_cat
 ORDER BY precio_actual DESC;
+```
 
 ---
 
