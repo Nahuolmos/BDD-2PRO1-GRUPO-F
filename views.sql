@@ -87,3 +87,49 @@ COMMENT ON VIEW v_detalle_pedido_con_producto IS 'Detalle con nombre de producto
 -- Verificación para pedido_id=1:
 -- SELECT * FROM v_detalle_pedido_con_producto WHERE pedido_id=1;
 -- vs query manual con JOIN debe coincidir exacto (EXCEPT 0).
+
+-- =============================================================================
+-- Parte C — Vista materializada: Facturación por categoría y mes
+-- Spec: specs/spec_vista_materializada.md
+-- Objetivo: acelerar reporte agregado costoso (3 JOINs + GROUP BY sobre 300k filas)
+-- =============================================================================
+
+DROP MATERIALIZED VIEW IF EXISTS mv_facturacion_categoria_mes;
+
+CREATE MATERIALIZED VIEW mv_facturacion_categoria_mes AS
+SELECT
+    c.nombre                                AS categoria,
+    EXTRACT(YEAR FROM p.fecha)::int         AS anio,
+    EXTRACT(MONTH FROM p.fecha)::int        AS mes,
+    COUNT(DISTINCT p.id)                    AS total_pedidos,
+    SUM(dp.cantidad * dp.precio_unitario)   AS facturacion_total
+FROM categoria c
+JOIN producto pr ON pr.categoria_id = c.id AND pr.activo = TRUE
+JOIN detalle_pedido dp ON dp.producto_id = pr.id
+JOIN pedido p ON p.id = dp.pedido_id
+WHERE c.activo = TRUE
+GROUP BY c.nombre, EXTRACT(YEAR FROM p.fecha), EXTRACT(MONTH FROM p.fecha)
+WITH DATA;
+
+COMMENT ON MATERIALIZED VIEW mv_facturacion_categoria_mes IS 'Reporte agregado costoso materializado. Refrescar con REFRESH CONCURRENTLY. Spec: spec_vista_materializada.md';
+
+-- Índice ÚNICO obligatorio para REFRESH CONCURRENTLY (y para búsquedas por PK lógica)
+CREATE UNIQUE INDEX IF NOT EXISTS idx_mv_facturacion_unique
+    ON mv_facturacion_categoria_mes (categoria, anio, mes);
+
+-- Índice adicional para filtros por año/mes (dashboard)
+CREATE INDEX IF NOT EXISTS idx_mv_facturacion_anio_mes
+    ON mv_facturacion_categoria_mes (anio, mes);
+
+-- Uso:
+-- SELECT * FROM mv_facturacion_categoria_mes ORDER BY anio DESC, mes DESC, facturacion_total DESC;
+-- REFRESH MATERIALIZED VIEW CONCURRENTLY mv_facturacion_categoria_mes;
+-- Ver informe_mediciones.md para tiempos: ~1200ms original vs ~12ms sobre MV (~100x).
+
+-- Verificación de equivalencia (debe dar 0):
+-- (SELECT categoria, anio, mes, total_pedidos, facturacion_total FROM mv_facturacion_categoria_mes)
+-- EXCEPT
+-- (SELECT c.nombre, EXTRACT(YEAR FROM p.fecha)::int, EXTRACT(MONTH FROM p.fecha)::int, COUNT(DISTINCT p.id), SUM(dp.cantidad*dp.precio_unitario)
+--  FROM categoria c JOIN producto pr ON pr.categoria_id=c.id AND pr.activo=true
+--  JOIN detalle_pedido dp ON dp.producto_id=pr.id JOIN pedido p ON p.id=dp.pedido_id WHERE c.activo=true
+--  GROUP BY c.nombre, EXTRACT(YEAR FROM p.fecha), EXTRACT(MONTH FROM p.fecha));
