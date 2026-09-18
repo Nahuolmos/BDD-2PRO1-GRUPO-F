@@ -62,3 +62,28 @@ COMMENT ON VIEW v_pedidos_con_cliente IS 'Pedidos con cliente sin exponer email 
 -- EXCEPT
 -- (SELECT p.id, p.fecha, p.forma_pago, p.cliente_id, cl.nombre FROM pedido p JOIN cliente cl ON cl.id=p.cliente_id)
 -- debe dar 0 filas. Y SELECT email FROM v_pedidos_con_cliente debe fallar.
+
+-- -------------------------------------------------------------------------
+-- Parte B — Vista 3: Detalle de un pedido con nombre del producto
+-- Spec: specs/spec_vista_detalle_pedido.md
+-- Objetivo: simplificar ticket/comprobante y reportes de detalle.
+-- -------------------------------------------------------------------------
+CREATE OR REPLACE VIEW v_detalle_pedido_con_producto AS
+SELECT
+    dp.pedido_id,
+    dp.producto_id,
+    pr.nombre               AS producto_nombre,
+    pr.categoria_id,
+    dp.cantidad,
+    dp.precio_unitario,
+    (dp.cantidad * dp.precio_unitario) AS subtotal,
+    p.fecha                 AS fecha_pedido
+FROM detalle_pedido dp
+JOIN producto pr ON pr.id = dp.producto_id
+JOIN pedido p    ON p.id = dp.pedido_id;
+
+COMMENT ON VIEW v_detalle_pedido_con_producto IS 'Detalle con nombre de producto y subtotal calculado. Spec: spec_vista_detalle_pedido.md';
+
+-- Verificación para pedido_id=1:
+-- SELECT * FROM v_detalle_pedido_con_producto WHERE pedido_id=1;
+-- vs query manual con JOIN debe coincidir exacto (EXCEPT 0).
