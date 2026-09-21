@@ -1,0 +1,14 @@
+# Privado - no entregar
+GAP_ANALYSIS_PRIVADO_NO_ENTREGAR.md
+*_PRIVADO_NO_ENTREGAR.md
+_gap_analysis.md
+
+# Backups y temporales creados durante el TP
+*_backup.sql
+views_full_backup.sql
+indices_full_backup.sql
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+*.tmp
