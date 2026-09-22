@@ -20,15 +20,18 @@ SELECT
 FROM producto pr
 JOIN categoria c ON c.id = pr.categoria_id
 WHERE pr.activo = TRUE
-  AND c.activo = TRUE;
+  AND c.activo = TRUE
+  AND pr.eliminado = FALSE
+  AND c.eliminado = FALSE;
 
-COMMENT ON VIEW v_productos_vigentes IS 'Catálogo público: solo productos y categorías vigentes. Spec: spec_vista_productos_vigentes.md';
+COMMENT ON VIEW v_productos_vigentes IS 'Catálogo público: solo productos y categorías vigentes no eliminados (soft delete). Spec: spec_vista_productos_vigentes.md + spec_soft_delete.md';
 
 -- Verificación de equivalencia (debe dar 0 filas si es correcta):
 -- (SELECT producto_id FROM v_productos_vigentes)
 -- EXCEPT
--- (SELECT pr.id FROM producto pr JOIN categoria c ON c.id=pr.categoria_id WHERE pr.activo=TRUE AND c.activo=TRUE);
+-- (SELECT pr.id FROM producto pr JOIN categoria c ON c.id=pr.categoria_id WHERE pr.activo=TRUE AND c.activo=TRUE AND pr.eliminado=FALSE AND c.eliminado=FALSE);
 -- Y viceversa con EXCEPT inverso.
+-- Soft delete: UPDATE producto SET eliminado=TRUE WHERE id=1; -> debe desaparecer de la vista pero seguir en tabla con eliminado=TRUE
 
 -- -------------------------------------------------------------------------
 -- Parte B — Vista 2: Pedidos con datos del cliente (CRITERIO DE SEGURIDAD)
@@ -104,10 +107,10 @@ SELECT
     COUNT(DISTINCT p.id)                    AS total_pedidos,
     SUM(dp.cantidad * dp.precio_unitario)   AS facturacion_total
 FROM categoria c
-JOIN producto pr ON pr.categoria_id = c.id AND pr.activo = TRUE
+JOIN producto pr ON pr.categoria_id = c.id AND pr.activo = TRUE AND pr.eliminado = FALSE
 JOIN detalle_pedido dp ON dp.producto_id = pr.id
 JOIN pedido p ON p.id = dp.pedido_id
-WHERE c.activo = TRUE
+WHERE c.activo = TRUE AND c.eliminado = FALSE
 GROUP BY c.nombre, EXTRACT(YEAR FROM p.fecha), EXTRACT(MONTH FROM p.fecha)
 WITH DATA;
 
@@ -130,6 +133,6 @@ CREATE INDEX IF NOT EXISTS idx_mv_facturacion_anio_mes
 -- (SELECT categoria, anio, mes, total_pedidos, facturacion_total FROM mv_facturacion_categoria_mes)
 -- EXCEPT
 -- (SELECT c.nombre, EXTRACT(YEAR FROM p.fecha)::int, EXTRACT(MONTH FROM p.fecha)::int, COUNT(DISTINCT p.id), SUM(dp.cantidad*dp.precio_unitario)
---  FROM categoria c JOIN producto pr ON pr.categoria_id=c.id AND pr.activo=true
---  JOIN detalle_pedido dp ON dp.producto_id=pr.id JOIN pedido p ON p.id=dp.pedido_id WHERE c.activo=true
+--  FROM categoria c JOIN producto pr ON pr.categoria_id=c.id AND pr.activo=true AND pr.eliminado=false
+--  JOIN detalle_pedido dp ON dp.producto_id=pr.id JOIN pedido p ON p.id=dp.pedido_id WHERE c.activo=true AND c.eliminado=false
 --  GROUP BY c.nombre, EXTRACT(YEAR FROM p.fecha), EXTRACT(MONTH FROM p.fecha));
