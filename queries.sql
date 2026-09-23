@@ -75,3 +75,22 @@ SELECT
 FROM promedios
 WHERE precio_actual > promedio_cat
 ORDER BY precio_actual DESC;
+
+-- Consulta 4: Categorías con facturación mensual alta (GROUP BY + HAVING)
+-- Objetivo 5 TPI: demuestra HAVING para filtrar grupos agregados (no filas con WHERE)
+-- Solo categorías/meses con facturación > 500.000 y al menos 10 pedidos, excluye borrados
+SELECT 
+    c.nombre AS categoria,
+    EXTRACT(YEAR FROM p.fecha) AS anio,
+    EXTRACT(MONTH FROM p.fecha) AS mes,
+    COUNT(DISTINCT p.id) AS total_pedidos,
+    SUM(dp.cantidad * dp.precio_unitario) AS facturacion_total
+FROM categoria c
+JOIN producto pr ON pr.categoria_id = c.id AND pr.activo = TRUE AND pr.eliminado = FALSE
+JOIN detalle_pedido dp ON dp.producto_id = pr.id
+JOIN pedido p ON p.id = dp.pedido_id
+WHERE c.activo = TRUE AND c.eliminado = FALSE
+GROUP BY c.nombre, EXTRACT(YEAR FROM p.fecha), EXTRACT(MONTH FROM p.fecha)
+HAVING SUM(dp.cantidad * dp.precio_unitario) > 500000
+   AND COUNT(DISTINCT p.id) >= 10
+ORDER BY facturacion_total DESC;
