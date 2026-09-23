@@ -60,7 +60,6 @@
 | **Agregado facturación** | `1240.89 ms` query original [informe_mediciones.md:156] | `~12 ms` sobre `mv_facturacion_categoria_mes` (36 filas) | **~100x** + `REFRESH CONCURRENTLY` diario 02:00, dato stale hasta refresh |
 
 Descartado: `idx_pedido_forma_pago` y `idx_producto_activo` por baja cardinalidad (ENUM 3 valores, boolean) — `EXPLAIN` sigue en `Seq Scan`, sin beneficio y +18% escritura [informe_mediciones.md:83].
-> [CAPTURA opcional: tabla comparativa `EXPLAIN` antes/después de `informe_mediciones.md:23`]
 
 ---
 
