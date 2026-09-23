@@ -33,12 +33,10 @@
 - **Transacciones:** 2 sesiones `psql` para probar `REPEATABLE READ` [transacciones.sql:33].
 - **Protocolo:** todas las pruebas en transacción reversible y con respaldo previo (`protocolo_seguridad.md:1`).
 
-> [CAPTURA 1: `EXPLAIN ANALYZE` antes — Seq Scan pedido]
-> [CAPTURA 2: `EXPLAIN ANALYZE` después — Bitmap Heap Scan con idx_pedido_fecha]
-> [CAPTURA 3: `EXCEPT` 0 filas de v_productos_vigentes]
-> [CAPTURA 4: `SELECT email FROM v_pedidos_con_cliente` — ERROR column does not exist]
-> [CAPTURA 5: `CALL pr_crear_pedido` y `SELECT fn_total_pedido`]
-> [CAPTURA 6: `INSERT` con trigger `RAISE EXCEPTION` stock insuficiente]
+![CAPTURA 1: SELECT email — ERROR column does not exist](capturas/captura1_error_email.png)
+![CAPTURA 2: EXCEPT 0 filas v_productos_vigentes](capturas/captura2_except_0.png)
+![CAPTURA 3: CALL pr_crear_pedido y fn_total_pedido](capturas/captura3_call_fn.png)
+![CAPTURA 4: trigger RAISE EXCEPTION stock insuficiente](capturas/captura4_trigger_stock.png)
 
 ---
 
@@ -61,9 +59,8 @@
 | **Escritura 500 INSERT detalle** | 342 ms (solo PK) | 404 ms (con 3 índices) | **+18.1% overhead**, aceptable vs ganancia lectura |
 | **Agregado facturación** | `1240.89 ms` query original [informe_mediciones.md:156] | `~12 ms` sobre `mv_facturacion_categoria_mes` (36 filas) | **~100x** + `REFRESH CONCURRENTLY` diario 02:00, dato stale hasta refresh |
 
-> [CAPTURA 7: tabla comparativa con `EXPLAIN` antes/después — copiar de `informe_mediciones.md:23`]
-
 Descartado: `idx_pedido_forma_pago` y `idx_producto_activo` por baja cardinalidad (ENUM 3 valores, boolean) — `EXPLAIN` sigue en `Seq Scan`, sin beneficio y +18% escritura [informe_mediciones.md:83].
+> [CAPTURA opcional: tabla comparativa `EXPLAIN` antes/después de `informe_mediciones.md:23`]
 
 ---
 
