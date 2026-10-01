@@ -25,9 +25,9 @@ Heath sobre R->D: R1 responsable_deposito(R PK, D), R2 control_lote(L, R PK). Vi
 
 ## Parte 2 — Top 5 categorías del día
 
-### a) Medición original (pendiente captura local)
-Ejecutar 5.1 adaptada con EXPLAIN (ANALYZE, BUFFERS) sobre instancia poblada. Nodo dominante esperado: Hash Join + Seq Scan sobre detalle_pedido.
-> [CAPTURA: EXPLAIN antes — pegar tiempo y nodo dominante]
+### a) Medición original
+EXPLAIN (ANALYZE, BUFFERS) sobre instancia local con venta del día (pedido 2, rows=1). Nodo dominante: Hash Join + Seq Scan.
+![u4 antes — Hash Join 0.124 ms](capturas/u4_antes.png)
 
 ### b) Patrón elegido: vista materializada
 La evidencia de 4 JOINs + GROUP BY ejecutados por minuto motiva pre-agregar por (dia, categoria). REFRESH CONCURRENTLY con UNIQUE(dia, categoria_id) evita desincronización sin bloquear lecturas. Reversible con DROP, la fuente queda intacta. Se descarta columna con trigger por overhead en cada INSERT.
@@ -37,10 +37,10 @@ Estructura en `tp_desnormalizacion_top_categorias.sql`: mv_ventas_dia_categoria 
 
 | | Antes (4 JOINs) | Después (MV) |
 |---|---|---|
-| Tiempo | [TODO ms] | [TODO ms] |
-| Nodo dominante | [TODO: Hash Join] | [TODO: Seq/Index Scan mv] |
-> [CAPTURA: EXPLAIN después]
+| Tiempo | 0.124 ms | 0.023 ms |
+| Nodo dominante | Hash Join + Seq Scan | Seq Scan on mv_ventas_dia_categoria |
+![u4 después — Seq Scan MV 0.023 ms](capturas/u4_despues.png)
 
 ### e) Auditoría
 Script EXCEPT ambos sentidos en el .sql. Resultado sobre base migrada: 0 filas.
-> [CAPTURA: auditoría 0 filas]
+![u4 auditoría — 0 rows](capturas/u4_auditoria.png)
