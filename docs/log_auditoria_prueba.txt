@@ -1,0 +1,2 @@
+TODO: pegar fragmento de log tras correr sql/auditoria_test.sql
+(incluye: connection, SELECT, INSERT pedido, UPDATE producto, EXCEPTION fn_autenticar fallido, disconnection)
