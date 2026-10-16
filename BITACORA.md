@@ -8,3 +8,9 @@
 | C (simulacro) | Generar script fallidos->éxito->lectura masiva->escalamiento. | Borrador sin SET ROLE (corrido como superuser, el GRANT hubiera tenido éxito). | Corregido a SET ROLE rol_reportes para que el escalamiento falle como debe; si no falla es hallazgo Parte A. |
 | C (reconstrucción) | Reconstruir incidente solo con log anonimizado + hipótesis contención. | Acertó fallidos+denegación pero omitió éxito y lectura masiva (no logueados con mod) e infirió origen externo sin evidencia de host. | Contraste en docs/informe_incidente.md; contención decidida por el equipo, no auto-ejecutada. |
 | D (anonimización) | Consulta agregada por rol/mes sobre anon + equivalente sobre real. | Propuso GROUP BY correcto en ambas. | Se verifica con EXCEPT = 0 filas en docs/verificacion_equivalencia.md; PII real nunca sale. |
+
+## Caso más significativo
+El GRANT ALL a rol_reportes (Parte A): se detectó comparando el borrador contra el spec Kiro (reportes = solo vistas) y el principio de mínimo privilegio; de aplicarse, reportes leería tablas con PII. Se corrigió antes de aplicar.
+
+## Historial Git
+Avance por partes con commits legibles (paso previo, A, B, C x2, D x2). La verificación real (\du, logs, EXCEPT) se pegó en docs en commits aparte en vez de dejar TODOs. La próxima vez, correr la verificación justo después de cada script para no arrastrar plantillas.
