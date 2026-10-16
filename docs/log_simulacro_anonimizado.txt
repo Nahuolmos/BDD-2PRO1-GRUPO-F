@@ -1,9 +1,24 @@
-TODO: pegar fragmento real tras correr sql/simulacro_incidente.sql, anonimizado.
-Formato esperado (valores sintéticos, sin PII real):
-... connection authorized: user=postgres database=food_store ...
-... ERROR: login fallido para user0001@test.invalid ...
-... ERROR: login fallido para user0001@test.invalid ...
-... ERROR: login fallido para user0001@test.invalid ...
-... statement: SELECT * FROM usuario; ...
-... ERROR: permission denied for role admin_datos ...
-Criterio: mails/nombres reales -> userNNNN@test.invalid, IPs -> 198.51.100.x
+2026-10-15 21:14:11 -03 LOG:  statement: GRANT SELECT ON producto, categoria TO rol_app_lectura;
+2026-10-15 21:14:11 -03 LOG:  statement: GRANT SELECT ON v_productos_vigentes TO rol_app_lectura, rol_reportes;
+2026-10-15 21:14:11 -03 LOG:  statement: GRANT rol_app_lectura TO rol_app_escritura;
+2026-10-15 21:14:11 -03 LOG:  statement: GRANT SELECT, INSERT, UPDATE ON pedido, detalle_pedido TO rol_app_escritura;
+2026-10-15 21:14:11 -03 LOG:  statement: GRANT EXECUTE ON FUNCTION fn_total_pedido(BIGINT) TO rol_app_escritura;
+2026-10-15 21:14:11 -03 LOG:  statement: GRANT SELECT ON pedido TO rol_soporte;
+2026-10-15 21:14:11 -03 LOG:  statement: GRANT SELECT (id, nombre, mail, rol) ON usuario TO rol_soporte;
+2026-10-15 21:14:11 -03 LOG:  statement: GRANT SELECT ON v_pedidos_con_cliente, v_detalle_pedido_con_producto, mv_ventas_dia_categoria TO rol_reportes;
+2026-10-15 21:14:11 -03 LOG:  statement: GRANT ALL ON ALL TABLES IN SCHEMA public TO admin_datos;
+2026-10-15 21:14:11 -03 LOG:  statement: ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO rol_app_lectura, rol_reportes;
+2026-10-15 21:15:27 -03 ERROR:  login fallido para user0001@test.invalid
+2026-10-15 21:15:27 -03 CONTEXT:  PL/pgSQL function fn_autenticar(text,text) line 7 at RAISE
+2026-10-15 21:15:27 -03 STATEMENT:  SELECT fn_autenticar('user0001@test.invalid', 'wrong1');
+2026-10-15 21:15:27 -03 ERROR:  login fallido para user0001@test.invalid
+2026-10-15 21:15:27 -03 CONTEXT:  PL/pgSQL function fn_autenticar(text,text) line 7 at RAISE
+2026-10-15 21:15:27 -03 STATEMENT:  SELECT fn_autenticar('user0001@test.invalid', 'wrong2');
+2026-10-15 21:15:27 -03 ERROR:  login fallido para user0001@test.invalid
+2026-10-15 21:15:27 -03 CONTEXT:  PL/pgSQL function fn_autenticar(text,text) line 7 at RAISE
+2026-10-15 21:15:27 -03 STATEMENT:  SELECT fn_autenticar('user0001@test.invalid', 'wrong3');
+2026-10-15 21:15:27 -03 LOG:  statement: GRANT admin_datos TO app_web;
+2026-10-15 21:15:27 -03 ERROR:  permission denied to grant role "admin_datos"
+2026-10-15 21:15:27 -03 DETAIL:  Only roles with the ADMIN option on role "admin_datos" may grant this role.
+2026-10-15 21:15:27 -03 STATEMENT:  GRANT admin_datos TO app_web;
+NOTA: mails reales reemplazados por user0001@test.invalid; checkpoints recortados.
