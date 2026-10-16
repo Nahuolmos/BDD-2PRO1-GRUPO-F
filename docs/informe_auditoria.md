@@ -6,7 +6,7 @@
 - log_statement = 'mod' (registra DDL + DML de modificación: INSERT/UPDATE/DELETE, no cada SELECT)
 - Ver con: SHOW log_connections; SHOW log_statement; Reiniciar/recargar config.
 
-## 3. Sobre el fragmento (docs/log_auditoria_prueba.txt TODO: pegar)
+## 3. Sobre el fragmento (ver docs/log_auditoria_prueba.txt)
 Útil: quién (user/database), qué (statement + ERROR login fallido), cuándo (timestamp), desde dónde (host/pid). Fuera de alcance: valores fila por fila (qué mail se leyó) y diffs old/new — eso lo daría pgaudit a nivel de nociones.
 
 ## 4. ¿El log es sensible? ¿Quién lo lee?
