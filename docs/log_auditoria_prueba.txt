@@ -1,2 +1,9 @@
-TODO: pegar fragmento de log tras correr sql/auditoria_test.sql
-(incluye: connection, SELECT, INSERT pedido, UPDATE producto, EXCEPTION fn_autenticar fallido, disconnection)
+2026-10-15 20:46:17 -03 LOG:  connection received: host=::1 port=44567
+2026-10-15 20:46:17 -03 LOG:  connection authenticated: identity="postgres" method=scram-sha-256 (C:/Program Files/PostgreSQL/18/data/pg_hba.conf:117)
+2026-10-15 20:46:17 -03 LOG:  connection authorized: user=postgres database=food_store application_name=psql
+2026-10-15 20:46:18 -03 LOG:  statement: INSERT INTO pedido (cliente_id, forma_pago, fecha, eliminado) VALUES (20001, 'EFECTIVO', NOW(), FALSE) RETURNING id;
+2026-10-15 20:46:18 -03 LOG:  statement: UPDATE producto SET stock = stock WHERE id = 50001;
+2026-10-15 20:50:33 -03 ERROR:  login fallido para nadie@foodstore.test
+2026-10-15 20:50:33 -03 CONTEXT:  PL/pgSQL function fn_autenticar(text,text) line 7 at RAISE
+2026-10-15 20:50:33 -03 STATEMENT:  SELECT fn_autenticar('nadie@foodstore.test', 'wrongpass');
+NOTA: el SELECT de lectura (v_productos_vigentes) no aparece con log_statement='mod'; el intento previo con fn inexistente y los checkpoints se recortaron por ruido.
