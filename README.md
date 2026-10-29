@@ -94,3 +94,25 @@ FROM categoria c JOIN producto pr ON pr.categoria_id=c.id AND pr.activo=true JOI
 -- Refresh concurrente
 REFRESH MATERIALIZED VIEW CONCURRENTLY mv_facturacion_categoria_mes;
 ```
+
+## Unidad 6 — Mantenimiento, respaldo y recuperación 
+ 
+| Archivo | Para qué |
+|---|---|
+| `SPEC_U6.md` | Plan: qué se automatiza, frecuencia, condición de éxito, reglas de seguridad |
+| `backup_foodstore.sh` | Respaldo custom con fecha/hora, log, falla con código ≠ 0 si `pg_dump` falla |
+| `health_check.sql` | Tamaño, conexiones, estado de tablas, consultas activas, alertas |
+| `maintenance.sql` | Revisión de autovacuum/ANALYZE + VACUUM/ANALYZE solo donde está justificado |
+| `restore_test.sh` | Restaura el último `.dump` en `foodstore_restore_test`, valida y mide RTO/RPO |
+| `informe_u6.pdf` | Informe post-incidente (1 página) |
+ 
+Requisitos: PostgreSQL 16+, base `foodstore`, contraseña en `~/.pgpass` (nunca en los scripts).
+Orden de carga de la base: `schema.sql` (DDL) → `data.sql` → poblado masivo → `soft_delete.sql`
+(`schema.sql` no carga de una sola vez: el poblado necesita las categorías de `data.sql`).
+ 
+```bash
+./backup_foodstore.sh
+psql -h localhost -U postgres -d foodstore -f health_check.sql
+psql -h localhost -U postgres -d foodstore -f maintenance.sql
+./restore_test.sh
+```
