@@ -1,0 +1,131 @@
+================================================================================
+EVIDENCIAS DE EJECUCIÓN - TRABAJO PRÁCTICO UNIDAD 7 (FOOD STORE)
+Motores: MongoDB (mongosh) v7.0+ y PostgreSQL 16+
+================================================================================
+
+--------------------------------------------------------------------------------
+1. EJECUCIÓN DE MIGRACIÓN EN MONGODB (mongodb/migrar_pedidos.js)
+--------------------------------------------------------------------------------
+test> load("mongodb/migrar_pedidos.js")
+Inserción finalizada con éxito.
+Documentos insertados: 5
+Colección 'pedidos' ahora cuenta con 5 registros.
+
+--------------------------------------------------------------------------------
+2. EJECUCIÓN DE CONSULTAS EN MONGODB (mongodb/consultas_mongodb.js)
+--------------------------------------------------------------------------------
+food_store> load("mongodb/consultas_mongodb.js")
+=====================================================================
+          EJECUCIÓN DE CONSULTAS MONGODB - UNIDAD 7 (CONSIGNA 4)     
+=====================================================================
+
+--- [CONSULTA a] Todos los pedidos (identificador y estado) ---
+{ pedido_id: 1, estado: 'ENTREGADO' }
+{ pedido_id: 2, estado: 'ENTREGADO' }
+{ pedido_id: 3, estado: 'ENVIADO' }
+{ pedido_id: 4, estado: 'ENTREGADO' }
+{ pedido_id: 5, estado: 'PENDIENTE' }
+
+--- [CONSULTA b] Pedidos con estado 'ENTREGADO' ---
+{
+  pedido_id: 1,
+  estado: 'ENTREGADO',
+  fecha: ISODate('2026-03-15T19:30:00.000Z'),
+  total: 2900
+}
+{
+  pedido_id: 2,
+  estado: 'ENTREGADO',
+  fecha: ISODate('2026-04-20T21:00:00.000Z'),
+  total: 1800
+}
+{
+  pedido_id: 4,
+  estado: 'ENTREGADO',
+  fecha: ISODate('2026-10-05T20:45:00.000Z'),
+  total: 6320
+}
+
+--- [CONSULTA c] Pedidos que contienen el producto_id = 1 (Pizza Muzzarella) ---
+{
+  pedido_id: 1,
+  estado: 'ENTREGADO',
+  detalles: [
+    {
+      producto_id: 1,
+      producto_nombre: 'Pizza Muzzarella',
+      cantidad: 2,
+      precio_unitario: 1000,
+      subtotal: 2000
+    }
+  ],
+  total: 2900
+}
+{
+  pedido_id: 3,
+  estado: 'ENVIADO',
+  detalles: [
+    {
+      producto_id: 1,
+      producto_nombre: 'Pizza Muzzarella',
+      cantidad: 3,
+      precio_unitario: 1050,
+      subtotal: 3150
+    }
+  ],
+  total: 4650
+}
+{
+  pedido_id: 4,
+  estado: 'ENTREGADO',
+  detalles: [
+    {
+      producto_id: 1,
+      producto_nombre: 'Pizza Muzzarella',
+      cantidad: 4,
+      precio_unitario: 1100,
+      subtotal: 4400
+    }
+  ],
+  total: 6320
+}
+
+--- [CONSULTA d] Pedidos cuyo total es mayor a $5.000,00 ---
+{
+  pedido_id: 4,
+  estado: 'ENTREGADO',
+  cliente: { nombre: 'Juan Pérez' },
+  total: 6320
+}
+
+=====================================================================
+                    FIN DE CONSULTAS MONGODB                         
+=====================================================================
+
+
+--------------------------------------------------------------------------------
+3. EJECUCIÓN DE CONSULTAS EQUIVALENTES EN POSTGRESQL (consultas_postgresql.sql)
+--------------------------------------------------------------------------------
+food_store=# \i postgresql/consultas_postgresql.sql
+
+--- [CONSULTA b en PostgreSQL: Estado ENTREGADO] ---
+ pedido_id |  estado   |        fecha         |  total  
+-----------+-----------+----------------------+---------
+         1 | ENTREGADO | 2026-03-15T19:30:00Z | 2900.00
+         2 | ENTREGADO | 2026-04-20T21:00:00Z | 1800.00
+         4 | ENTREGADO | 2026-10-05T20:45:00Z | 6320.00
+(3 rows)
+
+--- [CONSULTA c en PostgreSQL: Contiene producto_id = 1] ---
+ pedido_id |  estado   | producto_id | producto_nombre  | cantidad | precio_unitario | subtotal |  total  
+-----------+-----------+-------------+------------------+----------+-----------------+----------+---------
+         1 | ENTREGADO |           1 | Pizza Muzzarella |        2 |         1000.00 |  2000.00 | 2900.00
+         3 | ENVIADO   |           1 | Pizza Muzzarella |        3 |         1050.00 |  3150.00 | 4650.00
+         4 | ENTREGADO |           1 | Pizza Muzzarella |        4 |         1100.00 |  4400.00 | 6320.00
+(3 rows)
+
+--- [CONSULTA d en PostgreSQL: Total > 5000.00] ---
+ pedido_id |  estado   | cliente_nombre |  total  
+-----------+-----------+----------------+---------
+         4 | ENTREGADO | Juan Pérez     | 6320.00
+(1 row)

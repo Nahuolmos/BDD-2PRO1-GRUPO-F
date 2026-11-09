@@ -1,54 +1,70 @@
 // =============================================================================
-// TP Unidad 7 - Consultas en MongoDB (mongosh)
+// TP UNIDAD 7: NoSQL y nuevas formas de almacenamiento | Food Store
+// Archivo: mongodb/consultas_mongodb.js
+// Motor: MongoDB (mongosh)
 // Base de datos: food_store
 // Colección: pedidos
 // =============================================================================
 
+// Conexión o cambio a la base de datos de Food Store
 db = db.getSiblingDB("food_store");
+
+print("=====================================================================");
+print("          EJECUCIÓN DE CONSULTAS MONGODB - UNIDAD 7 (CONSIGNA 4)     ");
+print("=====================================================================\n");
 
 // -----------------------------------------------------------------------------
 // Consulta a) Mostrar todos los pedidos, incluyendo su identificador y estado.
+// Proyección: pedido_id y estado (excluyendo el _id interno de Mongo para lectura clara).
 // -----------------------------------------------------------------------------
-print("\n=== CONSULTA a) Todos los pedidos (identificador y estado) ===");
+print("--- [CONSULTA a] Todos los pedidos (identificador y estado) ---");
 db.pedidos.find(
     {},
     { pedido_id: 1, estado: 1, _id: 0 }
-).sort({ pedido_id: 1 });
+).sort({ pedido_id: 1 }).forEach(doc => {
+    printjson(doc);
+});
 
 // -----------------------------------------------------------------------------
 // Consulta b) Filtrar pedidos por un estado que exista en los datos migrados.
-// Estado elegido: "ENTREGADO" (se verificó que existe al menos un pedido con
-// este estado tras la migración).
+// Estado seleccionado: "ENTREGADO"
 // -----------------------------------------------------------------------------
-print("\n=== CONSULTA b) Pedidos con estado ENTREGADO ===");
+print("\n--- [CONSULTA b] Pedidos con estado 'ENTREGADO' ---");
 db.pedidos.find(
     { estado: "ENTREGADO" },
     { pedido_id: 1, estado: 1, fecha: 1, total: 1, _id: 0 }
-).sort({ fecha: -1 });
+).sort({ pedido_id: 1 }).forEach(doc => {
+    printjson(doc);
+});
 
 // -----------------------------------------------------------------------------
 // Consulta c) Buscar pedidos que contengan un producto determinado dentro
 // del arreglo de líneas (detalles).
-// Producto elegido: producto_id = 50001 (Pizza Muzzarilla, existe en los datos).
+// Producto seleccionado: producto_id = 1 ("Pizza Muzzarella")
+// Uso del operador de proyección $ para retornar únicamente la línea coincidente.
 // -----------------------------------------------------------------------------
-print("\n=== CONSULTA c) Pedidos que contienen producto_id 50001 ===");
+print("\n--- [CONSULTA c] Pedidos que contienen el producto_id = 1 (Pizza Muzzarella) ---");
 db.pedidos.find(
-    { "detalles.producto_id": 50001 },
+    { "detalles.producto_id": 1 },
     { pedido_id: 1, estado: 1, "detalles.$": 1, total: 1, _id: 0 }
-).sort({ pedido_id: 1 });
+).sort({ pedido_id: 1 }).forEach(doc => {
+    printjson(doc);
+});
 
 // -----------------------------------------------------------------------------
-// Consulta d) Buscar pedidos cuyo total sea superior a un importe elegido.
-// Umbral: 5000.00 (justificación: es un monto significativo que filtra pedidos
-// de mayor valor, permitiendo identificar compras al por mayor o clientes VIP;
-// con 5 pedidos migrados es esperable que al menos uno supere este umbral).
+// Consulta d) Buscar pedidos cuyo total sea superior a un importe elegido y justificar el umbral.
+// Umbral seleccionado: total > 5000.00
+// Justificación técnica: Permite aislar compras de volumen elevado o pedidos
+// corporativos / eventos, diferenciándolos del consumo minorista promedio ($1000 - $3000).
 // -----------------------------------------------------------------------------
-print("\n=== CONSULTA d) Pedidos con total > 5000.00 ===");
+print("\n--- [CONSULTA d] Pedidos cuyo total es mayor a $5.000,00 ---");
 db.pedidos.find(
     { total: { $gt: 5000 } },
     { pedido_id: 1, estado: 1, total: 1, "cliente.nombre": 1, _id: 0 }
-).sort({ total: -1 });
+).sort({ total: -1 }).forEach(doc => {
+    printjson(doc);
+});
 
-// =============================================================================
-// Fin de consultas_mongodb.js
-// =============================================================================
+print("\n=====================================================================");
+print("                    FIN DE CONSULTAS MONGODB                         ");
+print("=====================================================================");
