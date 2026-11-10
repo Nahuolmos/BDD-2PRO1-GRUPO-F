@@ -1,118 +1,101 @@
-# Food Store — Unidad 3, Semana 5
-## Índices, vistas y vistas materializadas
+# Food Store · Proyecto Integrador de Base de Datos II
+## Capa de Datos Completa: PostgreSQL 16+ (OLTP) · MongoDB (Documental) · SQLite (Móvil Offline)
 
-**Motor:** PostgreSQL 16+ — **Esquema base:** `schema.sql` (semanas 1-4, sin modificar)
+* **Asignatura:** Bases de Datos II — Tecnicatura Universitaria en Programación (UTN)
+* **Equipo de Trabajo:** Grupo F
+* **Integrantes:** Ignacio Ariza, Nahuel Olmos, Facundo Cabrera
+* **Repositorio:** [https://github.com/Nahuolmos/BDD-2PRO1-GRUPO-F](https://github.com/Nahuolmos/BDD-2PRO1-GRUPO-F)
 
-### Estructura del repositorio
+---
+
+### 1. Estructura del Repositorio
+
 ```
-BDD-2PRO1-GRUPO-F-main/
-├── schema.sql              # heredado, sin modificar (5 tablas + poblado masivo 200k pedidos)
-├── data.sql                # heredado
-├── queries.sql             # heredado (consultas analíticas)
-├── indices.sql             # NUEVO Parte A — 3 índices aceptados + 1 descartado comentado
-├── views.sql               # NUEVO Partes B y C — 3 vistas + 1 vista materializada + índices
-├── specs/                  # NUEVO especificaciones Kiro (8 archivos .md)
-│   ├── spec_indice_pedido_fecha.md
-│   ├── spec_indice_detalle_pedido_pedido_id.md
-│   ├── spec_indice_producto_activo_precio.md
-│   ├── spec_indice_descartado.md
-│   ├── spec_vista_productos_vigentes.md
-│   ├── spec_vista_pedidos_con_cliente.md
-│   ├── spec_vista_detalle_pedido.md
-│   └── spec_vista_materializada.md
-├── duia.md                 # Declaración Uso IA + bitácora
-├── informe_mediciones.md   # EXPLAIN ANALYZE antes/después, escritura, equivalencia vistas
-├── README.md               # este archivo
-└── protocolo_seguridad.md  # protocolo de respaldo/transacción reversible
+BDD-2PRO1-GRUPO-F/
+├── README.md                          # Guía de reproducción integral y ensayo de defensa
+├── movil/                             # Unidad 8: Base de la tablet y sincronización
+│   ├── schema_sqlite.sql              # Esquema DDL en SQLite (modo STRICT, foreign keys)
+│   ├── pruebas_sqlite.sql             # Pruebas locales (transacciones, C1 catálogo, C7 restricciones)
+│   ├── semaforo.sql                   # Algoritmo de sincronización y semáforo de conflictos
+│   ├── servidor_snapshot.csv          # Instantánea exportada del servidor
+│   ├── simulador.py                   # Simulador ejecutable de los casos C2 a C6
+│   └── foodstore_movil.db             # Base SQLite generada
+├── mongodb/                           # Unidad 7: NoSQL Documental
+│   ├── modelo_documental.md           # Diseño de la colección 'pedidos' y justificación de embebido
+│   ├── migrar_pedidos.sql             # Transformación SQL a JSON para MongoDB
+│   ├── migrar_pedidos.js              # Script insertMany() para mongosh
+│   ├── consultas_mongodb.js           # Consultas a, b, c, d en mongosh
+│   └── datos_pedidos.json             # Dataset de 5 pedidos autocontenidos
+├── postgresql/                        # Scripts relacionales de verificación
+│   └── consultas_postgresql.sql       # Consultas b y c equivalentes para verificación cruzada
+├── sql/                               # Scripts relacionales de Unidades 4, 5 y 6
+│   ├── roles.sql                      # Roles y permisos (mínimo privilegio - U5)
+│   ├── simulacro_incidente.sql        # Simulacro de escalamiento y auditoría (U5)
+│   ├── u7_datos_prueba.sql            # Semilla de datos de 5 pedidos para paridad 1:1
+│   └── ...
+├── backup_foodstore.sh                # Script de respaldo automatizado (U6)
+├── restore_test.sh                    # Script de restauración cronometrada (U6)
+├── health_check.sql                   # Monitoreo de salud de base de datos (U6)
+├── maintenance.sql                    # Mantenimiento rutinario (VACUUM ANALYZE) (U6)
+└── docs/                              # Informes técnicos, Kiro specs y bitácoras
+    ├── informe_unidad7.md             # Informe técnico Unidad 7 (NoSQL)
+    ├── informe_unidad8.md             # Informe técnico Unidad 8 (TP8 Móvil y Semáforo)
+    ├── informe_u6.md                  # Informe de incidente y RTO/RPO Unidad 6
+    ├── bitacora_ia.md                 # Bitácora formal de uso de IA (U8)
+    ├── DUIA.md                        # Declaración formal obligatoria de uso de IA
+    └── kiro/                          # Especificaciones de ingeniería en Kiro
+        ├── requirements.md            # Requisitos EARS ligados a casos de prueba
+        ├── design.md                  # Documento de diseño arquitectónico
+        └── tasks.md                   # Plan de tareas de implementación
 ```
 
-### Cómo reproducir las pruebas
+---
 
-#### 1. Restaurar base limpia (protocolo de seguridad)
+### 2. Orden de Reproducción desde Cero
+
+Para recrear y verificar todo el ecosistema de datos de Food Store en una máquina limpia:
+
+#### Paso 1: Levantar la Base Relacional Central (PostgreSQL 16+)
 ```bash
-# Respaldo previo si ya tenés datos
-pg_dump -U postgres -d food_store -F c -f backup_previo.dump
+# 1. Crear la base de datos
+createdb -U postgres food_store
 
-# Recrear esquema + datos base + poblado masivo
+# 2. Cargar esquema base, normalización y datos iniciales
 psql -U postgres -d food_store -f schema.sql
 psql -U postgres -d food_store -f data.sql
-# El poblado masivo de 20k/50k/200k ya está al final de schema.sql; si lo separaste, ejecutar también:
-# psql -U postgres -d food_store -f queries.sql
-ANALYZE; -- actualizar estadísticas antes de medir
+psql -U postgres -d food_store -f soft_delete.sql
+
+# 3. Cargar seguridad, auditoría y datos de paridad
+psql -U postgres -d food_store -f sql/roles.sql
+psql -U postgres -d food_store -f sql/u7_datos_prueba.sql
 ```
 
-#### 2. Parte A — Medir índices (antes)
-```sql
--- En psql, con \timing on
-EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM pedido WHERE fecha BETWEEN NOW()-'30 days'::interval AND NOW();
-EXPLAIN (ANALYZE, BUFFERS) SELECT cl.id, SUM(dp.cantidad*dp.precio_unitario) FROM cliente cl JOIN pedido p ON p.cliente_id=cl.id JOIN detalle_pedido dp ON dp.pedido_id=p.id GROUP BY cl.id ORDER BY 2 DESC LIMIT 20;
-EXPLAIN (ANALYZE, BUFFERS) SELECT * FROM producto WHERE activo=TRUE AND categoria_id=1 ORDER BY precio_actual;
--- Registrar tiempos en informe_mediciones.md
-
--- Costo escritura (antes)
-BEGIN;
-\timing on
-INSERT INTO detalle_pedido (pedido_id, producto_id, cantidad, precio_unitario)
-SELECT (200000 - s.i), ((s.i % 50000)+1), 1, 1500 FROM generate_series(1,500) s(i) ON CONFLICT DO NOTHING;
-ROLLBACK;
-```
-
-#### 3. Crear índices
+#### Paso 2: Recrear y Consultar la Base Documental (MongoDB)
 ```bash
-psql -U postgres -d food_store -f indices.sql
-psql -U postgres -d food_store -c "ANALYZE pedido; ANALYZE detalle_pedido; ANALYZE producto;"
+# Importar los 5 pedidos con datos embebidos
+mongosh food_store mongodb/migrar_pedidos.js
+
+# Ejecutar las 4 consultas documentales y verificar salidas
+mongosh food_store mongodb/consultas_mongodb.js
 ```
 
-#### 4. Parte A — Medir índices (después)
-Repetir los mismos `EXPLAIN ANALYZE` y comparar: debe cambiar de `Seq Scan` a `Bitmap Heap Scan` / `Index Scan` y bajar tiempos (ver `informe_mediciones.md`).
-
-#### 5. Partes B y C — Vistas
+#### Paso 3: Recrear y Probar la Base Móvil Offline (SQLite 3.37+)
 ```bash
-psql -U postgres -d food_store -f views.sql
+# 1. Crear el esquema STRICT y correr pruebas unitarias locales (C1 y C7)
+sqlite3 movil/foodstore_movil.db < movil/schema_sqlite.sql
+sqlite3 movil/foodstore_movil.db < movil/pruebas_sqlite.sql
+
+# 2. Ejecutar la simulación completa de sincronización y semáforo (C2 a C6)
+python movil/simulador.py
 ```
 
-Verificación de equivalencia (debe dar 0 filas):
-```sql
--- Vista 1
-(SELECT producto_id FROM v_productos_vigentes EXCEPT SELECT pr.id FROM producto pr JOIN categoria c ON c.id=pr.categoria_id WHERE pr.activo=TRUE AND c.activo=TRUE)
-UNION ALL
-(SELECT pr.id FROM producto pr JOIN categoria c ON c.id=pr.categoria_id WHERE pr.activo=TRUE AND c.activo=TRUE EXCEPT SELECT producto_id FROM v_productos_vigentes);
+---
 
--- Vista 2 (seguridad: debe fallar)
-SELECT email FROM v_pedidos_con_cliente; -- ERROR esperado: column does not exist
+### 3. Guía para el Ensayo de Defensa (10 minutos)
 
--- Vista 3
-SELECT * FROM v_detalle_pedido_con_producto WHERE pedido_id=1;
-
--- Materializada: comparar tiempos
-\timing on
-SELECT * FROM mv_facturacion_categoria_mes ORDER BY anio DESC, mes DESC;
--- vs query original
-SELECT c.nombre, EXTRACT(YEAR FROM p.fecha)::int, EXTRACT(MONTH FROM p.fecha)::int, COUNT(DISTINCT p.id), SUM(dp.cantidad*dp.precio_unitario)
-FROM categoria c JOIN producto pr ON pr.categoria_id=c.id AND pr.activo=true JOIN detalle_pedido dp ON dp.producto_id=pr.id JOIN pedido p ON p.id=dp.pedido_id WHERE c.activo=true GROUP BY 1,2,3 ORDER BY 2 DESC,3 DESC;
-
--- Refresh concurrente
-REFRESH MATERIALIZED VIEW CONCURRENTLY mv_facturacion_categoria_mes;
-```
-
-## Unidad 6 — Mantenimiento, respaldo y recuperación 
- 
-| Archivo | Para qué |
-|---|---|
-| `SPEC_U6.md` | Plan: qué se automatiza, frecuencia, condición de éxito, reglas de seguridad |
-| `backup_foodstore.sh` | Respaldo custom con fecha/hora, log, falla con código ≠ 0 si `pg_dump` falla |
-| `health_check.sql` | Tamaño, conexiones, estado de tablas, consultas activas, alertas |
-| `maintenance.sql` | Revisión de autovacuum/ANALYZE + VACUUM/ANALYZE solo donde está justificado |
-| `restore_test.sh` | Restaura el último `.dump` en `foodstore_restore_test`, valida y mide RTO/RPO |
-| `informe_u6.pdf` | Informe post-incidente (1 página) |
- 
-Requisitos: PostgreSQL 16+, base `foodstore`, contraseña en `~/.pgpass` (nunca en los scripts).
-Orden de carga de la base: `schema.sql` (DDL) → `data.sql` → poblado masivo → `soft_delete.sql`
-(`schema.sql` no carga de una sola vez: el poblado necesita las categorías de `data.sql`).
- 
-```bash
-./backup_foodstore.sh
-psql -h localhost -U postgres -d foodstore -f health_check.sql
-psql -h localhost -U postgres -d foodstore -f maintenance.sql
-./restore_test.sh
-```
+* **Eje 1 · El Mapa de la Capa de Datos (3 min):**  
+  Presentar la coexistencia de los tres motores: **PostgreSQL** como *Single Source of Truth* que custodia el stock y confirma ventas; **MongoDB** como almacén desnormalizado que acelera la lectura atómica de comprobantes; y **SQLite** como cliente *offline-first* que opera en modo STRICT con centavos enteros.
+* **Eje 2 · Caso en Vivo del Semáforo (4 min):**  
+  Demostrar en vivo el simulador (`python movil/simulador.py` o ejecución SQL). Mostrar cómo el caso **C2** detecta el `CONFLICTO` de precio sin romper el catálogo del servidor, y cómo la idempotencia de **C6** bloquea duplicados mediante clave primaria.
+* **Eje 3 · Un Hallazgo Significativo de la IA (3 min):**  
+  Explicar el descarte fundamentado de `VACUUM FULL` sugerido por la IA en la Unidad 6 (por bloqueo exclusivo total), o la corrección de tipo `REAL` a `INTEGER` en la Unidad 8 para erradicar errores de precisión de punto flotante en la moneda.
