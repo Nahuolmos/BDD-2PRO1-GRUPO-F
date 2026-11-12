@@ -3,7 +3,7 @@
 
 * **Asignatura:** Bases de Datos II — Tecnicatura Universitaria en Programación (UTN)
 * **Equipo de Trabajo:** Grupo F
-* **Integrantes:** Ignacio Ariza, Nahuel Olmos, Facundo Cabrera
+* **Integrantes:** Ignacio Ariza, Nahuel Olmos, Facundo Cabrera, Agustin Pereryra
 * **Repositorio:** [https://github.com/Nahuolmos/BDD-2PRO1-GRUPO-F](https://github.com/Nahuolmos/BDD-2PRO1-GRUPO-F)
 
 ---
