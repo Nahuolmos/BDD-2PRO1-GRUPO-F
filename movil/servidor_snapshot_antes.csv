@@ -1,0 +1,1 @@
+   SELECT * FROM v_snapshot_movil WHERE id IN (1,2,3,50004) ORDER BY id;

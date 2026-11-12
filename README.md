@@ -79,16 +79,6 @@ mongosh food_store mongodb/migrar_pedidos.js
 mongosh food_store mongodb/consultas_mongodb.js
 ```
 
-#### Paso 3: Recrear y Probar la Base Móvil Offline (SQLite 3.37+)
-```bash
-# 1. Crear el esquema STRICT y correr pruebas unitarias locales (C1 y C7)
-sqlite3 movil/foodstore_movil.db < movil/schema_sqlite.sql
-sqlite3 movil/foodstore_movil.db < movil/pruebas_sqlite.sql
-
-# 2. Ejecutar la simulación completa de sincronización y semáforo (C2 a C6)
-python movil/simulador.py
-```
-
 ---
 
 ### 3. Guía para el Ensayo de Defensa (10 minutos)

@@ -1,0 +1,2 @@
+-- C6: reenvío de la misma solicitud (mismo UUID) -> debe fallar por clave primaria
+INSERT INTO cola_sync VALUES ('a5000000-0000-4000-8000-000000000001','c5000000-0000-4000-8000-000000000001','PENDIENTE',NULL);

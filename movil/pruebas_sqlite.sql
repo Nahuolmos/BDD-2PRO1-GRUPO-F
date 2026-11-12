@@ -83,18 +83,18 @@ WHERE id_local = 'b_cancelado_0000-0000-0000-000000000002';
 
 -- 4.a Prueba con cantidad = 0 (Debe fallar por CHECK (cantidad > 0))
 -- En sqlite3 o script, envolver en bloque para verificar el rechazo:
-/*
+
 INSERT INTO item_borrador (id_local, producto_id, cantidad, precio_centavos_visto)
 VALUES ('b1000000-0000-0000-0000-000000000001', 2, 0, 15000);
 -- ERROR ESPERADO: CHECK constraint failed: cantidad > 0
-*/
+
 
 -- 4.b Prueba con producto_id inexistente (Debe fallar por FOREIGN KEY)
-/*
+
 INSERT INTO item_borrador (id_local, producto_id, cantidad, precio_centavos_visto)
 VALUES ('b1000000-0000-0000-0000-000000000001', 9999, 1, 15000);
 -- ERROR ESPERADO: FOREIGN KEY constraint failed
-*/
+
 
 -- Comprobación final: La tabla item_borrador solo contiene las líneas válidas originales
 SELECT 'Verificación integridad C7' AS control, COUNT(*) AS items_validos_totales FROM item_borrador;

@@ -50,9 +50,8 @@ Se utiliza SQLite 3.37+ con la cláusula `STRICT` y activación explícita de `P
 | fecha_copia         |   |               | 1:N          |
 +---------------------+   |    +--------------------+    |
                           +----|   item_borrador    |    |
-                               +--------------------+    |
-                               | id (PK autoincrem) |    |
-                               | id_local (FK) -----|----+
+                               +--------------------+    |                  |
+                               | id_local (FK)  ----|----+
                                | producto_id (FK) --|
                                | cantidad           |
                                | precio_cent_visto  |
